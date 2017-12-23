@@ -24,7 +24,7 @@ public class LifeApp extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		p = new Pixmap(WIDTH,HEIGHT, Pixmap.Format.RGB888);
 		pixTex = new Texture(p);
-		world = new LifeWorld();
+		world = new LifeWorld(2);
 		world.addLife(6);
 	}
 

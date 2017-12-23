@@ -10,8 +10,12 @@ import java.util.stream.IntStream;
 public class LifeWorld {
 
     public List<Life> life = new ArrayList<>(10);
+    public List<Food> food = new ArrayList<>();
 
-    public LifeWorld(){
+    private int foodSpawnRate;
+
+    public LifeWorld(int foodSpawnRate){
+        this.foodSpawnRate = foodSpawnRate;
     }
 
 
@@ -29,10 +33,21 @@ public class LifeWorld {
     }
 
     public void update() {
+        // spawn food
+        IntStream.range(0,foodSpawnRate).forEach(x -> {
+            int xf = randomInt(LifeApp.WIDTH);
+            int yf = randomInt(LifeApp.HEIGHT);
+            if(canGrowHere(xf, yf)){
+                food.add(new Food(xf, yf));
+            }
+        });
+
+        // each life acts
         life.forEach(Life::act);
     }
 
     public void render(Pixmap p) {
+        food.forEach(f -> f.render(p));
         life.forEach(l -> l.render(p));
     }
 
