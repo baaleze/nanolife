@@ -17,15 +17,14 @@ public class Element {
     };
 
     public Element(int x, int y, Life life) {
-        position = new Point(x,y);
+        position = new Point(x, y);
         c = colors[ThreadLocalRandom.current().nextInt(colors.length)];
         l = life;
     }
 
 
-
     public void render(Pixmap p) {
         p.setColor(c);
-        p.drawPixel(position.x+l.position.x, position.y+l.position.y);
+        p.drawRectangle((position.x + l.position.x) * l.world.factor, (position.y + l.position.y) * l.world.factor, l.world.factor, l.world.factor);
     }
 }

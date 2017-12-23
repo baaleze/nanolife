@@ -9,11 +9,17 @@ import java.util.stream.IntStream;
 
 public class LifeWorld {
 
+    final int factor;
+
     public List<Life> life = new ArrayList<>(10);
+
+    public LifeWorld(int factor){
+        this.factor = factor;
+    }
 
 
     public void addLife() {
-        life.add(new Life(randomInt(LifeApp.WIDTH), randomInt(LifeApp.HEIGHT), this));
+        life.add(new Life(randomInt(LifeApp.WIDTH/factor), randomInt(LifeApp.HEIGHT/factor), this));
     }
 
 

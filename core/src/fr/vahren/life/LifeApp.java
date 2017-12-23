@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class LifeApp extends ApplicationAdapter {
-	static final int WIDTH = 800;
-	static final int HEIGHT = 800;
+	public static final int WIDTH = 800;
+    public static final int HEIGHT = 800;
 
 	SpriteBatch batch;
 	Pixmap p;
@@ -22,7 +22,7 @@ public class LifeApp extends ApplicationAdapter {
 	public void create () {
 		batch = new SpriteBatch();
 		p = new Pixmap(WIDTH,HEIGHT, Pixmap.Format.RGB888);
-		world = new LifeWorld();
+		world = new LifeWorld(2);
 		world.addLife(6);
 	}
 

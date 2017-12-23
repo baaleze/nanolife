@@ -7,6 +7,8 @@ import fr.vahren.life.LifeApp;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.width = LifeApp.WIDTH;
+		config.height = LifeApp.HEIGHT;
 		new LwjglApplication(new LifeApp(), config);
 	}
 }
