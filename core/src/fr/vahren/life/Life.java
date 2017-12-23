@@ -13,7 +13,7 @@ public class Life {
     LifeWorld world;
     Point position;
 
-    private List<Element> elements = new ArrayList<>(0);
+    List<Element> elements = new ArrayList<>(0);
     private Rectangle bbox;
 
     public Life(int x, int y, LifeWorld w) {
@@ -40,7 +40,7 @@ public class Life {
     public void render(Pixmap p) {
         // draw core
         p.setColor(Color.BLACK);
-        p.drawRectangle(position.x * world.factor, position.y * world.factor, world.factor, world.factor);
+        p.drawPixel(position.x,position.y);
 
         elements.forEach(e -> e.render(p));
     }
@@ -48,7 +48,7 @@ public class Life {
     public void grow(int x, int y) {
 
         // is the space empty ?
-        if (isAvailableToGrow(x, y)) {
+        if (world.canGrowHere(x + position.x, y + position.y)) {
             // GROW!
             elements.add(new Element(x, y, this));
             // refresh bbox
@@ -78,20 +78,6 @@ public class Life {
         this.bbox = boundingBox();
     }
 
-    private boolean isAvailableToGrow(int x, int y) {
-        if (x == 0 && y == 0) {
-            // CORE
-            return false;
-        }
-        for (Element e : elements) {
-            if (e.position.x == x && e.position.y == y) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public void move() {
         switch (getDir(position.x, position.y)) {
             case RIGHT:
@@ -119,17 +105,17 @@ public class Life {
         int left = 0, right = 0, up = 0, down = 0;
 
         for (Element element : elements) {
-            if (element.position.x < left) {
-                left = element.position.x;
+            if (element.x() < left) {
+                left = element.x();
             }
-            if (element.position.x > right) {
-                right = element.position.x;
+            if (element.x() > right) {
+                right = element.x();
             }
-            if (element.position.y < up) {
-                up = element.position.y;
+            if (element.y() < up) {
+                up = element.y();
             }
-            if (element.position.y > down) {
-                down = element.position.y;
+            if (element.y() > down) {
+                down = element.y();
             }
         }
 
@@ -141,13 +127,13 @@ public class Life {
         if (x + bbox.left > 0) {
             available.add(Dir.LEFT);
         }
-        if (x + bbox.right < LifeApp.WIDTH/world.factor - 1) {
+        if (x + bbox.right < LifeApp.WIDTH - 1) {
             available.add(Dir.RIGHT);
         }
         if (y + bbox.up > 0) {
             available.add(Dir.UP);
         }
-        if (y + bbox.down < LifeApp.HEIGHT/world.factor - 1) {
+        if (y + bbox.down < LifeApp.HEIGHT - 1) {
             available.add(Dir.DOWN);
         }
         if (available.isEmpty()) {

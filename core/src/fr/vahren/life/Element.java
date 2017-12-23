@@ -25,6 +25,22 @@ public class Element {
 
     public void render(Pixmap p) {
         p.setColor(c);
-        p.drawRectangle((position.x + l.position.x) * l.world.factor, (position.y + l.position.y) * l.world.factor, l.world.factor, l.world.factor);
+        p.drawPixel(position.x + l.position.x, position.y + l.position.y);
+    }
+
+    public int absx() {
+        return l.position.x + position.x;
+    }
+
+    public int x() {
+        return position.x;
+    }
+
+    public int absy() {
+        return l.position.y + position.y;
+    }
+
+    public int y() {
+        return position.y;
     }
 }

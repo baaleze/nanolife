@@ -9,17 +9,14 @@ import java.util.stream.IntStream;
 
 public class LifeWorld {
 
-    final int factor;
-
     public List<Life> life = new ArrayList<>(10);
 
-    public LifeWorld(int factor){
-        this.factor = factor;
+    public LifeWorld(){
     }
 
 
     public void addLife() {
-        life.add(new Life(randomInt(LifeApp.WIDTH/factor), randomInt(LifeApp.HEIGHT/factor), this));
+        life.add(new Life(randomInt(LifeApp.WIDTH), randomInt(LifeApp.HEIGHT), this));
     }
 
 
@@ -37,5 +34,25 @@ public class LifeWorld {
 
     public void render(Pixmap p) {
         life.forEach(l -> l.render(p));
+    }
+
+    /**
+     *
+     * @param x Absolute
+     * @param y Absolute
+     * @return
+     */
+    public boolean canGrowHere(int x, int y){
+        for(Life l: life){
+            if(l.position.x == x && l.position.y == y){
+                return false;
+            }
+            for(Element e: l.elements){
+                if(e.absx() == x && e.absy() == y){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
