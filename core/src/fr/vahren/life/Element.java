@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 public class Element {
 
@@ -13,7 +14,7 @@ public class Element {
     private Life l;
 
     private final Color[] colors = {
-            Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.PINK
+            Color.BLUE, Color.RED, Color.GREEN //, Color.YELLOW, Color.ORANGE, Color.PINK
     };
 
     public Element(int x, int y, Life life) {
@@ -42,5 +43,14 @@ public class Element {
 
     public int y() {
         return position.y;
+    }
+
+    public void rotate(int i) {
+        IntStream.range(0,i).forEach(x -> {
+            int newX = -position.y;
+            int newY = position.x;
+            position.y = newY;
+            position.x = newX;
+        });
     }
 }

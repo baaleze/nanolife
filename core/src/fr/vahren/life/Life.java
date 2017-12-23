@@ -12,29 +12,71 @@ public class Life {
 
     LifeWorld world;
     Point position;
+    Dir dir;
 
     List<Element> elements = new ArrayList<>(0);
-    private Rectangle bbox;
+    private Rectangle boundingBox;
 
     public Life(int x, int y, LifeWorld w) {
         position = new Point(x, y);
         this.world = w;
-        bbox = boundingBox();
+        boundingBox = boundingBox();
+        dir = Dir.values()[ThreadLocalRandom.current().nextInt(Dir.values().length)];
     }
 
     public void act() {
-        int action = ThreadLocalRandom.current().nextInt(5);
-        switch (action) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                move();
+        int action = ThreadLocalRandom.current().nextInt(100);
+        if(action < 5){
+            rotate(1);
+        }else if (action < 30) {
+            move();
+        }else if (action < 40) {
+            grow(0, 0);
+        }
+
+    }
+
+    private void rotate(int i) {
+        dir = Dir.values()[(dir.ordinal()+i)%Dir.values().length];
+        elements.forEach(element -> {
+            element.rotate(i);
+        });
+    }
+
+    private void move(){
+        switch (dir) {
+            case UP:
+                moveTo(position.x, position.y - 1);
                 break;
-            case 4:
-                grow(0, 0);
+            case DOWN:
+                moveTo(position.x, position.y + 1);
+                break;
+            case LEFT:
+                moveTo(position.x - 1, position.y);
+                break;
+            case RIGHT:
+                moveTo(position.x + 1, position.y);
                 break;
         }
+    }
+
+    private void moveTo(int x, int y) {
+        if(canMoveTo(x,y)){
+            position.x = x;
+            position.y = y;
+        }
+    }
+
+    private boolean canMoveTo(int x, int y) {
+        // check for world borders
+        if(x + boundingBox.left < 0 ||
+                x + boundingBox.right > LifeApp.WIDTH-1 ||
+                y + boundingBox.up < 0 ||
+                y + boundingBox.down > LifeApp.HEIGHT-1){
+            return false;
+        }
+
+        return true;
     }
 
     public void render(Pixmap p) {
@@ -51,7 +93,7 @@ public class Life {
         if (world.canGrowHere(x + position.x, y + position.y)) {
             // GROW!
             elements.add(new Element(x, y, this));
-            // refresh bbox
+            // refresh boundingBox
             refreshBoundingBox();
         } else {
 
@@ -75,25 +117,27 @@ public class Life {
     }
 
     private void refreshBoundingBox() {
-        this.bbox = boundingBox();
+        this.boundingBox = boundingBox();
     }
 
-    public void move() {
+    public Point chooseMove() {
+        int x = position.x;
+        int y = position.y;
         switch (getDir(position.x, position.y)) {
             case RIGHT:
-                position.x = position.x + 1;
+                x = position.x + 1;
                 break;
             case LEFT:
-                position.x = position.x - 1;
+                x = position.x - 1;
                 break;
             case DOWN:
-                position.y = position.y + 1;
+                y = position.y + 1;
                 break;
             case UP:
-                position.y = position.y - 1;
+                y = position.y - 1;
                 break;
-
         }
+        return new Point(x,y);
     }
 
     private static Dir getDir() {
@@ -124,16 +168,16 @@ public class Life {
 
     private Dir getDir(int x, int y) {
         List<Dir> available = new ArrayList<>(0);
-        if (x + bbox.left > 0) {
+        if (x + boundingBox.left > 0) {
             available.add(Dir.LEFT);
         }
-        if (x + bbox.right < LifeApp.WIDTH - 1) {
+        if (x + boundingBox.right < LifeApp.WIDTH - 1) {
             available.add(Dir.RIGHT);
         }
-        if (y + bbox.up > 0) {
+        if (y + boundingBox.up > 0) {
             available.add(Dir.UP);
         }
-        if (y + bbox.down < LifeApp.HEIGHT - 1) {
+        if (y + boundingBox.down < LifeApp.HEIGHT - 1) {
             available.add(Dir.DOWN);
         }
         if (available.isEmpty()) {

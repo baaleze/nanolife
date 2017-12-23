@@ -10,12 +10,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class LifeApp extends ApplicationAdapter {
 	public static final int WIDTH = 400;
-    public static final int HEIGHT = 400;
-    public static final int ZOOM = 2;
+    public static final int HEIGHT = 200;
+    public static final int ZOOM = 4;
 
 	SpriteBatch batch;
 	Pixmap p;
-	Texture img;
+	Texture pixTex;
 
 	private LifeWorld world;
 	
@@ -23,6 +23,7 @@ public class LifeApp extends ApplicationAdapter {
 	public void create () {
 		batch = new SpriteBatch();
 		p = new Pixmap(WIDTH,HEIGHT, Pixmap.Format.RGB888);
+		pixTex = new Texture(p);
 		world = new LifeWorld();
 		world.addLife(6);
 	}
@@ -37,9 +38,11 @@ public class LifeApp extends ApplicationAdapter {
         p.fill();
 		// build Pixmap
         world.render(p);
+        // draw on texture
+        pixTex.draw(p,0,0);
 
 		batch.begin();
-		batch.draw(new Texture(p), 0, 0,WIDTH*ZOOM, HEIGHT*ZOOM);
+		batch.draw(pixTex, 0, 0,WIDTH*ZOOM, HEIGHT*ZOOM);
 		batch.end();
 	}
 	
