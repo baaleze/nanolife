@@ -12,9 +12,10 @@ public class LifeWorld {
     public List<Life> life = new ArrayList<>(10);
     public List<Food> food = new ArrayList<>();
 
-    private int foodSpawnRate;
+    private float foodSpawnRate;
+    private float foodBuildup;
 
-    public LifeWorld(int foodSpawnRate){
+    public LifeWorld(float foodSpawnRate){
         this.foodSpawnRate = foodSpawnRate;
     }
 
@@ -34,13 +35,17 @@ public class LifeWorld {
 
     public void update() {
         // spawn food
-        IntStream.range(0,foodSpawnRate).forEach(x -> {
+        foodBuildup += foodSpawnRate;
+        int foodToSpawn = (int) Math.floor(foodBuildup);
+
+        IntStream.range(0,foodToSpawn).forEach(x -> {
             int xf = randomInt(LifeApp.WIDTH);
             int yf = randomInt(LifeApp.HEIGHT);
             if(canGrowHere(xf, yf)){
                 food.add(new Food(xf, yf));
             }
         });
+        foodBuildup -= foodToSpawn;
 
         // each life acts
         life.forEach(Life::act);
