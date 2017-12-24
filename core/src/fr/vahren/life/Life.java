@@ -90,30 +90,47 @@ public class Life {
     public void grow(int x, int y) {
 
         // is the space empty ?
+
         if (world.canGrowHere(x + position.x, y + position.y)) {
             // GROW!
             elements.add(new Element(x, y, this));
             // refresh boundingBox
             refreshBoundingBox();
         } else {
+            if (!isEmpty(x,y)) {
+                // we are still one the life body
+                // choose a side to grow
+                switch (getDir(x + position.x, y + position.y)) {
+                    case UP:
+                        grow(x, y - 1);
+                        break;
+                    case DOWN:
+                        grow(x, y + 1);
+                        break;
+                    case LEFT:
+                        grow(x - 1, y);
+                        break;
+                    case RIGHT:
+                        grow(x + 1, y);
+                        break;
 
-            // choose a side to grow
-            switch (getDir(x + position.x, y + position.y)) {
-                case UP:
-                    grow(x, y - 1);
-                    break;
-                case DOWN:
-                    grow(x, y + 1);
-                    break;
-                case LEFT:
-                    grow(x - 1, y);
-                    break;
-                case RIGHT:
-                    grow(x + 1, y);
-                    break;
-
+                }
             }
         }
+    }
+
+    private boolean isEmpty(int x, int y) {
+        if(x == 0 && y == 0){
+            return false;
+        }
+
+        for(Element e:elements){
+            if(e.x() == x && e.y() == y){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void refreshBoundingBox() {
