@@ -26,8 +26,10 @@ public class Life {
 
     public void act() {
         int action = ThreadLocalRandom.current().nextInt(100);
-        if(action < 5){
-            rotate(1);
+        if(action < 5) {
+            rotate(true);
+        } else if (action < 15){
+            rotate(false);
         }else if (action < 30) {
             move();
         }else if (action < 40) {
@@ -36,11 +38,22 @@ public class Life {
 
     }
 
-    private void rotate(int i) {
-        dir = Dir.values()[(dir.ordinal()+i)%Dir.values().length];
-        elements.forEach(element -> {
-            element.rotate(i);
-        });
+    private void rotate(boolean clockwise) {
+        if(canRotate(clockwise)) {
+            dir = Dir.values()[(dir.ordinal() + 1) % Dir.values().length];
+            elements.forEach(element -> {
+                element.rotate(clockwise);
+            });
+        }
+    }
+
+    private boolean canRotate(boolean clockwise) {
+        Rectangle rotatedBbox = boundingBox.copy();
+        rotatedBbox.rotate(clockwise);
+        return !((rotatedBbox.up + position.y < 0) ||
+                (rotatedBbox.down + position.y > LifeApp.HEIGHT - 1) ||
+                (rotatedBbox.left + position.x < 0 ) ||
+                (rotatedBbox.right + position.x > LifeApp.WIDTH - 1));
     }
 
     private void move(){

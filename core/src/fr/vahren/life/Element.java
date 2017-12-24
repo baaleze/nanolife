@@ -45,12 +45,10 @@ public class Element {
         return position.y;
     }
 
-    public void rotate(int i) {
-        IntStream.range(0,i).forEach(x -> {
-            int newX = -position.y;
-            int newY = position.x;
-            position.y = newY;
-            position.x = newX;
-        });
+    public void rotate(boolean clockwise) {
+        int newX = clockwise ? -position.y : position.y;
+        int newY = clockwise ? position.x : -position.x;
+        position.y = newY;
+        position.x = newX;
     }
 }

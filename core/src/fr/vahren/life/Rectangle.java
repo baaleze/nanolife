@@ -12,4 +12,27 @@ public class Rectangle {
         up = u;
         down = d;
     }
+
+    public Rectangle copy() {
+        return new Rectangle(left,right,up,down);
+    }
+
+    public void rotate(boolean clockwise) {
+        int newL, newR, newU, newD;
+        if(clockwise){
+            newR = -up;
+            newD = right;
+            newL = -down;
+            newU = left;
+        }else {
+            newR = down;
+            newD = -left;
+            newL = up;
+            newU = -right;
+        }
+        right = newR;
+        left = newL;
+        up = newU;
+        down = newD;
+    }
 }
