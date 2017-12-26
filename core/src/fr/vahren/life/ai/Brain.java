@@ -6,7 +6,6 @@ package fr.vahren.life.ai;
  */
 public abstract class Brain<I,O> implements Cloneable
 {
-    public abstract void learn();
 
     public abstract O decide(I input);
 

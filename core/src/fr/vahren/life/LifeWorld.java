@@ -48,7 +48,7 @@ public class LifeWorld {
         foodBuildup -= foodToSpawn;
 
         // each life acts
-        life.forEach(Life::act);
+        life.forEach(Life::step);
     }
 
     public void render(Pixmap p) {

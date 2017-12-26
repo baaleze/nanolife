@@ -2,6 +2,8 @@ package fr.vahren.life;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
+import fr.vahren.life.ai.NeuralNetworkBrain;
+import fr.vahren.life.ai.State;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +12,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Life {
 
+    private final NeuralNetworkBrain brain;
     LifeWorld world;
     Point position;
     Dir dir;
+    private int food = 0;
+    private int foodAround = 0;
+    private int lifetime = 0;
 
     List<Element> elements = new ArrayList<>(0);
     private Rectangle boundingBox;
@@ -22,24 +28,37 @@ public class Life {
         this.world = w;
         boundingBox = boundingBox();
         dir = Dir.values()[ThreadLocalRandom.current().nextInt(Dir.values().length)];
+        brain = new NeuralNetworkBrain(this);
     }
 
-    public void act() {
-        int action = ThreadLocalRandom.current().nextInt(100);
-        if(action < 5) {
-            rotate(true);
-        } else if (action < 15){
-            rotate(false);
-        }else if (action < 30) {
-            move();
-        }else if (action < 40) {
-            grow(0, 0);
+    public void act(NeuralNetworkBrain.Action action) {
+        switch (action) {
+            case EAT:
+                // TODO
+                food++;
+                break;
+            case BACK:
+                move(false);
+                break;
+            case MOVE:
+                move(true);
+                break;
+            case GROW:
+                grow(0, 0);
+                break;
+            case ROTATE_CLOCKWISE:
+                rotate(true);
+                break;
+            case ROTATE_COUNTER_CLOCKWISE:
+                rotate(false);
+                break;
         }
-
+        // increase lifetime
+        lifetime++;
     }
 
     private void rotate(boolean clockwise) {
-        if(canRotate(clockwise)) {
+        if (canRotate(clockwise)) {
             dir = Dir.values()[(dir.ordinal() + 1) % Dir.values().length];
             elements.forEach(element -> {
                 element.rotate(clockwise);
@@ -52,29 +71,29 @@ public class Life {
         rotatedBbox.rotate(clockwise);
         return !((rotatedBbox.up + position.y < 0) ||
                 (rotatedBbox.down + position.y > LifeApp.HEIGHT - 1) ||
-                (rotatedBbox.left + position.x < 0 ) ||
+                (rotatedBbox.left + position.x < 0) ||
                 (rotatedBbox.right + position.x > LifeApp.WIDTH - 1));
     }
 
-    private void move(){
+    private void move(boolean b) {
         switch (dir) {
             case UP:
-                moveTo(position.x, position.y - 1);
+                moveTo(position.x, position.y + (b ? -1 : 1));
                 break;
             case DOWN:
-                moveTo(position.x, position.y + 1);
+                moveTo(position.x, position.y + (b ? 1 : -1));
                 break;
             case LEFT:
-                moveTo(position.x - 1, position.y);
+                moveTo(position.x + (b ? -1 : 1), position.y);
                 break;
             case RIGHT:
-                moveTo(position.x + 1, position.y);
+                moveTo(position.x + (b ? 1 : -1), position.y);
                 break;
         }
     }
 
     private void moveTo(int x, int y) {
-        if(canMoveTo(x,y)){
+        if (canMoveTo(x, y)) {
             position.x = x;
             position.y = y;
         }
@@ -82,20 +101,16 @@ public class Life {
 
     private boolean canMoveTo(int x, int y) {
         // check for world borders
-        if(x + boundingBox.left < 0 ||
-                x + boundingBox.right > LifeApp.WIDTH-1 ||
+        return !(x + boundingBox.left < 0 ||
+                x + boundingBox.right > LifeApp.WIDTH - 1 ||
                 y + boundingBox.up < 0 ||
-                y + boundingBox.down > LifeApp.HEIGHT-1){
-            return false;
-        }
-
-        return true;
+                y + boundingBox.down > LifeApp.HEIGHT - 1);
     }
 
     public void render(Pixmap p) {
         // draw core
         p.setColor(Color.BLACK);
-        p.drawPixel(position.x,position.y);
+        p.drawPixel(position.x, position.y);
 
         elements.forEach(e -> e.render(p));
     }
@@ -110,7 +125,7 @@ public class Life {
             // refresh boundingBox
             refreshBoundingBox();
         } else {
-            if (!isEmpty(x,y)) {
+            if (!isEmpty(x, y)) {
                 // we are still one the life body
                 // choose a side to grow
                 switch (getDir(x + position.x, y + position.y)) {
@@ -133,12 +148,12 @@ public class Life {
     }
 
     private boolean isEmpty(int x, int y) {
-        if(x == 0 && y == 0){
+        if (x == 0 && y == 0) {
             return false;
         }
 
-        for(Element e:elements){
-            if(e.x() == x && e.y() == y){
+        for (Element e : elements) {
+            if (e.x() == x && e.y() == y) {
                 return false;
             }
         }
@@ -167,7 +182,7 @@ public class Life {
                 y = position.y - 1;
                 break;
         }
-        return new Point(x,y);
+        return new Point(x, y);
     }
 
     private static Dir getDir() {
@@ -215,6 +230,28 @@ public class Life {
         } else {
             return Optional.ofNullable(available.get(ThreadLocalRandom.current().nextInt(available.size()))).orElse(Dir.NONE);
         }
+    }
+
+    public State getState() {
+        return new State(food, foodAround, lifetime, elements.size(), dir.ordinal(), position.x, position.y);
+    }
+
+    public double getReward() {
+        return 0;
+    }
+
+    public void reset() {
+        food = 0;
+        lifetime = 0;
+    }
+
+    @Override
+    public String toString() {
+        return getState().toString();
+    }
+
+    public void step() {
+        brain.step(brain.decide(getState()));
     }
 
     enum Dir {

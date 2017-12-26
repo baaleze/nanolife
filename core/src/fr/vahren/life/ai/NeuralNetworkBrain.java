@@ -1,20 +1,21 @@
 package fr.vahren.life.ai;
 
+import fr.vahren.life.Life;
 import org.deeplearning4j.gym.StepReply;
 import org.deeplearning4j.rl4j.learning.sync.qlearning.QLearning;
 import org.deeplearning4j.rl4j.learning.sync.qlearning.discrete.QLearningDiscreteDense;
 import org.deeplearning4j.rl4j.mdp.MDP;
 import org.deeplearning4j.rl4j.network.dqn.DQNFactoryStdDense;
-import org.deeplearning4j.rl4j.policy.DQNPolicy;
 import org.deeplearning4j.rl4j.space.ArrayObservationSpace;
 import org.deeplearning4j.rl4j.space.DiscreteSpace;
 import org.deeplearning4j.rl4j.space.ObservationSpace;
 import org.deeplearning4j.rl4j.util.DataManager;
+import org.json.JSONObject;
 import org.nd4j.linalg.cpu.nativecpu.NDArray;
 
 import java.io.IOException;
 
-public abstract class NeuralNetworkBrain extends Brain<State,Integer> implements MDP<State,Integer,DiscreteSpace> {
+public class NeuralNetworkBrain extends Brain<State,Integer> implements MDP<State,Integer,DiscreteSpace> {
 
     public static QLearning.QLConfiguration QL =
             new QLearning.QLConfiguration(
@@ -37,26 +38,31 @@ public abstract class NeuralNetworkBrain extends Brain<State,Integer> implements
             DQNFactoryStdDense.Configuration.builder()
                     .l2(0.001).learningRate(0.0005).numHiddenNodes(16).numLayer(3).build();
 
+    private final Life life;
+
     private QLearningDiscreteDense<State> learning;
 
-    private void initBrain() throws IOException {
-        DataManager manager = new DataManager(true);
-
+    public NeuralNetworkBrain(Life life) {
+        super();
+        this.life = life;
+        DataManager manager = null;
+        try {
+            manager = new DataManager(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.learning = new QLearningDiscreteDense<>(this, NET, QL, manager);
-
-        learning.train();
-
     }
 
     @Override
     public Integer decide(State input) {
-        return learning.getPolicy().nextAction(new NDArray(input.toArray()));
+        return learning.getPolicy().nextAction(new NDArray(new double[][] {input.toArray()} ));
     }
 
     @Override
     public ObservationSpace<State> getObservationSpace() {
         // TODO
-        return new ArrayObservationSpace<>(new int[] {1,2,3});
+        return new ArrayObservationSpace<>(new int[] {1, life.getState().toArray().length});
     }
 
     @Override
@@ -66,7 +72,8 @@ public abstract class NeuralNetworkBrain extends Brain<State,Integer> implements
 
     @Override
     public State reset() {
-        return new State();
+        life.reset();
+        return life.getState();
     }
 
     @Override
@@ -76,8 +83,8 @@ public abstract class NeuralNetworkBrain extends Brain<State,Integer> implements
 
     @Override
     public StepReply<State> step(Integer action) {
-        // TODO
-        return null;
+        life.act(Action.values()[action]);
+        return new StepReply<>(life.getState(), life.getReward(), false, new JSONObject());
     }
 
     @Override
@@ -92,8 +99,8 @@ public abstract class NeuralNetworkBrain extends Brain<State,Integer> implements
         return null;
     }
 
-    enum Action {
-        MOVE, BACK, ROTATE, GROW, EAT
+    public enum Action {
+        MOVE, BACK, ROTATE_CLOCKWISE, ROTATE_COUNTER_CLOCKWISE, GROW, EAT
     }
 
 }
