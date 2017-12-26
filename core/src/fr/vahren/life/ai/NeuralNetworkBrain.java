@@ -1,17 +1,20 @@
 package fr.vahren.life.ai;
 
+import org.deeplearning4j.gym.StepReply;
 import org.deeplearning4j.rl4j.learning.sync.qlearning.QLearning;
-import org.deeplearning4j.rl4j.learning.sync.qlearning.discrete.QLearningDiscreteConv;
 import org.deeplearning4j.rl4j.learning.sync.qlearning.discrete.QLearningDiscreteDense;
-import org.deeplearning4j.rl4j.network.dqn.DQNFactory;
+import org.deeplearning4j.rl4j.mdp.MDP;
 import org.deeplearning4j.rl4j.network.dqn.DQNFactoryStdDense;
 import org.deeplearning4j.rl4j.policy.DQNPolicy;
-import org.deeplearning4j.rl4j.space.Box;
+import org.deeplearning4j.rl4j.space.ArrayObservationSpace;
+import org.deeplearning4j.rl4j.space.DiscreteSpace;
+import org.deeplearning4j.rl4j.space.ObservationSpace;
 import org.deeplearning4j.rl4j.util.DataManager;
+import org.nd4j.linalg.cpu.nativecpu.NDArray;
 
 import java.io.IOException;
 
-public abstract class NeuralNetworkBrain<I,O> extends Brain<I,O> {
+public abstract class NeuralNetworkBrain extends Brain<State,Integer> implements MDP<State,Integer,DiscreteSpace> {
 
     public static QLearning.QLConfiguration QL =
             new QLearning.QLConfiguration(
@@ -34,17 +37,63 @@ public abstract class NeuralNetworkBrain<I,O> extends Brain<I,O> {
             DQNFactoryStdDense.Configuration.builder()
                     .l2(0.001).learningRate(0.0005).numHiddenNodes(16).numLayer(3).build();
 
-    private void initNetwork() throws IOException {
+    private QLearningDiscreteDense<State> learning;
+
+    private void initBrain() throws IOException {
         DataManager manager = new DataManager(true);
 
-        LifeMDP mdp = new LifeMDP();
-
-        QLearningDiscreteDense<State> learning = new QLearningDiscreteDense<>(mdp,NET,QL,manager);
+        this.learning = new QLearningDiscreteDense<>(this, NET, QL, manager);
 
         learning.train();
 
-        DQNPolicy<State> policy = learning.getPolicy();
+    }
 
+    @Override
+    public Integer decide(State input) {
+        return learning.getPolicy().nextAction(new NDArray(input.toArray()));
+    }
+
+    @Override
+    public ObservationSpace<State> getObservationSpace() {
+        // TODO
+        return new ArrayObservationSpace<>(new int[] {1,2,3});
+    }
+
+    @Override
+    public DiscreteSpace getActionSpace() {
+        return new DiscreteSpace(Action.values().length);
+    }
+
+    @Override
+    public State reset() {
+        return new State();
+    }
+
+    @Override
+    public void close() {
+        // TODO
+    }
+
+    @Override
+    public StepReply<State> step(Integer action) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public boolean isDone() {
+        // Done when it is dead TODO
+        return false;
+    }
+
+    @Override
+    public MDP<State, Integer, DiscreteSpace> newInstance() {
+        // TODO
+        return null;
+    }
+
+    enum Action {
+        MOVE, BACK, ROTATE, GROW, EAT
     }
 
 }
