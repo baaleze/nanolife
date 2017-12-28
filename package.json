@@ -1,0 +1,25 @@
+{
+  "name": "@vahren/nanolife",
+  "version": "1.0.0",
+  "description": "nanolife",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baaleze/nanolife.git"
+  },
+  "keywords": [
+    "ai"
+  ],
+  "author": "baaleze",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/baaleze/nanolife/issues"
+  },
+  "homepage": "https://github.com/baaleze/nanolife#readme",
+  "dependencies": {
+    "neataptic": "^1.4.7"
+  }
+}
