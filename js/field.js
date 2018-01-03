@@ -85,6 +85,15 @@ var activationColor = function(value, max){
   return color;
 }
 
+var activationColor = function(value, max, value2, max2){
+  var power = 1 - Math.min(value/max, 1);
+  var power2 = 1 - Math.min(value2/max2, 1);
+  var color = [0, 255, 0]
+  color[0] = power * 255;
+  color[2] = power2 * 255;
+  return color;
+}
+
 /** Get the angle from one point to another */
 function angleToPoint(x1, y1, x2, y2){
   d = distance(x1, y1, x2, y2);

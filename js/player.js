@@ -1,14 +1,15 @@
 function Player(genome){
     this.x = Math.floor(Math.random() * WIDTH);
     this.y = Math.floor(Math.random() * HEIGHT);
-    this.vx = 0;
-    this.vy = 0;
   
     this.brain = genome;
     this.brain.score = 0;
   
-    this.area = MIN_AREA;
-    this.visualarea = this.area;
+    this.size = MIN_AREA;
+
+    this.food = START_FOOD;
+
+    this.movespeed = MIN_SPEED;
   
     players.push(this);
   }
@@ -16,14 +17,13 @@ function Player(genome){
   Player.prototype = {
     /** Update the stats */
     update: function(){
-      if(this.area > MAX_AREA) this.area = MAX_AREA;
-      if(this.area < MIN_AREA) this.area = MIN_AREA;
   
       var input = this.detect();
       var output = this.brain.activate(input);
   
-      var moveangle = output[0] * 2 * PI;
-      var movespeed = output[1] > 1 ? 1 : output[1] < 0 ? 0 : output[1];
+      var movedir = Math.round(output[0] * 4) % 4; // gives 0 1 2 or 3
+      var moveangle = movedir * PI / 2;
+      var movespeed = (output[1] > 1 ? 1 : output[1] < 0 ? 0 : output[1]) * this.movespeed;
   
       this.vx = movespeed * Math.cos(moveangle) * SPEED;
       this.vy = movespeed * Math.sin(moveangle) * SPEED;
@@ -38,12 +38,17 @@ function Player(genome){
       // Limit position to width and height
       this.x = this.x >= WIDTH ? this.x % WIDTH : this.x <= 0 ? this.x + WIDTH : this.x;
       this.y = this.y >= HEIGHT ? this.y % HEIGHT : this.y <= 0 ? this.y + HEIGHT : this.y;
+
+      // GROW ?
+
+      // ATK ?
   
-      this.area *= DECREASE_SIZE;
+      this.food -= DECREASE_FOOD;
   
       // Replace highest score to visualise
-      this.brain.score = this.area;
-      highestScore = this.brain.score > highestScore ? this.brain.score : highestScore;
+      this.brain.score = this.food + this.size;
+      highestFood = this.food > highestFood ? this.food : highestFood;
+      highestSize = this.size > highestSize ? this.size : highestSize;
     },
   
     /** Restart from new position */
@@ -52,18 +57,18 @@ function Player(genome){
       this.y = Math.floor(Math.random() * HEIGHT);
       this.vx = 0;
       this.vy = 0;
-      this.area = MIN_AREA;
-      this.visualarea = this.area;
+      this.size = MIN_AREA;
+      this.food = START_FOOD;
     },
   
     /** Display the player on the field */
     show: function(){
       this.visualarea = lerp(this.visualarea, this.area, 0.2);
       var radius = Math.sqrt(this.visualarea / PI);
-      var color = activationColor(this.brain.score, highestScore);
+      var color = activationColor(this.food, highestFood, this.size, highestSize);
   
       fill(color);
-      ellipse(this.x, this.y, radius);
+      rect(this.x - PIX/2, this.y - PIX/2)
     },
   
     /** Visualies the detection of the brain */

@@ -10,18 +10,22 @@ Config.warnings = false;
 /** Settings */
 var WIDTH            = $('#field').width();
 var HEIGHT           = 800;
+var PIX              = 10;
 
 var MAX_AREA         = 10000;
-var MIN_AREA         = 400;
+var MIN_AREA         = 1;
 
 var RELATIVE_SIZE    = 1.1;
-var DECREASE_SIZE    = 0.998;
+var DECREASE_FOOD    = 1;
+var DECREASE_FOOD_GROW = 4;
+var DECREASE_FOOD_GROW_DIST_FACTOR = 2;
 
 var DETECTION_RADIUS = 150;
 var FOOD_DETECTION   = 3;
 var PLAYER_DETECTION = 3;
+var START_FOOD       = 10;
 
-var MIN_SPEED        = 0.6;
+var MIN_SPEED        = 0.5;
 var SPEED            = 3;
 
 var FOOD_AREA        = 80;
