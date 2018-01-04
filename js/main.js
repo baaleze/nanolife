@@ -10,15 +10,17 @@ Config.warnings = false;
 /** Settings */
 var WIDTH            = $('#field').width();
 var HEIGHT           = 800;
-var PIX              = 10;
+var PIX              = 4;
 
 var MAX_SIZE         = 40;
+var MAX_CELL_TYPE    = 10;
 var MIN_AREA         = 1;
+var MAX_DIST_FROM_CORE = 5;
 
 var RELATIVE_SIZE    = 1.1;
 var DECREASE_FOOD    = 1;
 var DECREASE_FOOD_GROW = 20;
-var DECREASE_FOOD_GROW_DIST_FACTOR = 2;
+var DECREASE_FOOD_GROW_DIST_FACTOR = 5;
 
 var DETECTION_RADIUS = 40;
 var FOOD_DETECTION   = 2;
@@ -30,6 +32,7 @@ var START_FOOD       = 100;
 var MAX_FOOD = 500;
 
 var MIN_SPEED        = 0.5;
+var SPEED_INCR = 0.1;
 var SPEED            = 3;
 
 var FOOD        = 50;

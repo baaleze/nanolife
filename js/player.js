@@ -9,9 +9,13 @@ function Player(genome){
 
     this.food = START_FOOD;
 
+    this.malus = 0;
+
     this.maxMoveSpeed = MIN_SPEED;
 
-    this.cells = [new Cell('C',0,0)];
+    this.cells = [new Cell(0,0,0)];
+
+    this.nbCell = [1,0,0,0];
   
     players.push(this);
   }
@@ -19,8 +23,10 @@ function Player(genome){
   Player.prototype = {
     /** Update the stats */
     update: function(){
-      this.food -= DECREASE_FOOD;
+      this.food -= DECREASE_FOOD*this.size;
       if(this.food < 0){
+        // starving is baaaaad
+        this.malus += 100;
         this.restart();
         return;
       }
@@ -29,10 +35,14 @@ function Player(genome){
       // OUTPUT IS
       // [ DIR SPEED GROW? GROW_WHAT GROW_X GROW_Y ]
       var output = this.brain.activate(input);
+      // LIMIT
+      for(var i = 0;i<output.length;i++) {
+        output[i] = output[i] % 1.0;
+      }
   
-      var moveangle = output[0] * PI / 2;
+      var moveangle = output[0] * 2 * PI;
       var movespeed = (output[1] > 1 ? 1 : output[1] < 0 ? 0 : output[1]) * this.maxMoveSpeed;
-  
+      
       this.vx = movespeed * Math.cos(moveangle) * SPEED;
       this.vy = movespeed * Math.sin(moveangle) * SPEED;
   
@@ -48,25 +58,61 @@ function Player(genome){
       this.y = this.y >= HEIGHT ? this.y % HEIGHT : this.y <= 0 ? this.y + HEIGHT : this.y;
 
       // GROW ?
+      if(output[2] > 0.7) {
+        var what = (Math.round(output[3] * 3) % 3) + 1; // 0(C) 1(F) 2(S) 3(M)
+        var x = Math.round(output[4]*MAX_DIST_FROM_CORE*2-MAX_DIST_FROM_CORE);
+        var y = Math.round(output[5]*MAX_DIST_FROM_CORE*2-MAX_DIST_FROM_CORE);
+        this.grow(what, x, y);
+      }
 
       // ATK ?
   
       
   
       // Replace highest score to visualise
-      this.brain.score = this.food + this.size;
+      this.brain.score = this.food + this.size - this.malus;
       highestFood = this.food > highestFood ? this.food : highestFood;
       highestSize = this.size > highestSize ? this.size : highestSize;
     },
 
-    grow: function() {
+    grow: function(what, relx, rely) {
+      // get real x,y
+      var x = relx * PIX;
+      var y = rely * PIX;
 
-      // TODO GROW FUNCTION
+      // check available space
+      var cell;
+      this.cells.forEach(c => {
+        if(c.x === x && c.y === y){
+          cell = c;
+        }
+      });
 
-      var speed = 1;
-      cells.forEach(c => {
-        if(c.type === 'M'){
-          speed++;
+      // check conditions
+      var willGrow = this.nbCell[what] <= MAX_CELL_TYPE && this.cells.length <= MAX_SIZE && !(relx === 0 && rely === 0);
+
+      // do it
+      if(willGrow){
+        if(cell !== undefined){
+          this.nbCell[cell.type] = this.nbCell[cell.type] - 1;
+          this.nbCell[what] = this.nbCell[what] + 1;
+          cell.type = what;
+        }else{
+          this.nbCell[what] = this.nbCell[what] + 1;
+          this.cells.push(new Cell(what,x,y));
+        }
+      }
+
+      // food cost
+      var dist = Math.max(Math.abs(relx),Math.abs(rely));
+      this.food -= DECREASE_FOOD_GROW + DECREASE_FOOD_GROW_DIST_FACTOR*dist;
+
+      // update stats
+      this.size = this.cells.length;
+      var speed = MIN_SPEED;
+      this.cells.forEach(c => {
+        if(c.type === 3){
+          speed += SPEED_INCR;
         }
       });
       this.maxMoveSpeed = speed;
@@ -80,21 +126,36 @@ function Player(genome){
       this.vy = 0;
       this.size = MIN_AREA;
       this.food = START_FOOD;
+      this.cells = [new Cell(0,0,0)];
+      this.nbCell = [1,0,0,0];
     },
   
     /** Display the player on the field */
     show: function(){
-      var color = activationColor(this.food, highestFood, this.size, highestSize);
-
-      fill(color);
-      rect(this.x - PIX/2, this.y - PIX/2, PIX, PIX);
-      noFill();
-      stroke(color);
-      ellipse(this.x, this.y, DETECTION_RADIUS*2);
-      var s = Math.round(this.x) + '/'+Math.round(this.y)+'\nf:'+this.food;
-      text(s,this.x+2, this.y, 50,50);
-      stroke([0,230,0]);
-      ellipse(this.x, this.y, FOOD_ABSORPTION_RADIUS*2);
+      this.cells.forEach(c => {
+        var color = c.type === 0 ? activationColor(this.food, highestFood, this.size, highestSize) : c.color;
+        // core
+        fill(color);
+        rect(this.x + c.x - PIX/2, this.y + c.y - PIX/2, PIX, PIX);
+        if(c.type === 0 || c.type === 2){ // C S
+          // DETECTION
+          noFill();
+          stroke([30,30,230]);
+          ellipse(this.x+c.x, this.y+c.y, DETECTION_RADIUS*2);
+          if(c.type === 0){
+            var s = this.vx+' | '+this.vy;
+            text(s,this.x+2, this.y, 50,50);
+          }
+        }
+        if(c.type === 0 || c.type === 1){ // C F
+          // FOOD
+          noFill();
+          stroke([0,230,0]);
+          ellipse(this.x+c.x, this.y+c.y, FOOD_ABSORPTION_RADIUS*2);
+        }
+      });
+      
+      
     },
   
     /** Visualies the detection of the brain */
@@ -117,7 +178,7 @@ function Player(genome){
     /* Checks if object can be eaten */
     eat: function(object){
       this.cells.forEach(c => {
-        if(c.type === 'F' || c.type === 'C'){
+        if(c.type === 1 || c.type === 0){
           var dist = distance(this.x+c.x, this.y+c.y, object.x, object.y);
           if(dist < FOOD_ABSORPTION_RADIUS && this.size > object.size){
             this.food += object.food;
@@ -132,7 +193,7 @@ function Player(genome){
     getPlayerDetection: function() {
       var count = 0;
       this.cells.forEach(c => {
-        if(c.type === 'C' || c.type === 'S') {
+        if(c.type === 0 || c.type === 2) {
           count++;
         }
       });
@@ -150,7 +211,7 @@ function Player(genome){
         if(player == this || this.eat(player)) continue;
   
         this.cells.forEach(c => {
-          if(c.type === 'S' || c.type === 'C'){
+          if(c.type === 2 || c.type === 0){
             var dist = distance(this.x+c.x, this.y+c.y, player.x, player.y);
             if(dist < DETECTION_RADIUS){
               // Check if closer than any other object
@@ -176,7 +237,7 @@ function Player(genome){
         if(this.eat(food)) continue;
   
         this.cells.forEach(c => {
-          if(c.type === 'S' || c.type === 'C'){
+          if(c.type === 2 || c.type === 0){
             var dist = distance(this.x+c.x, this.y+c.y, food.x, food.y);
             if(dist < DETECTION_RADIUS){
               // Check if closer than any other object
