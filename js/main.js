@@ -44,7 +44,7 @@ var INPUT_SIZE = 19;
 var OUTPUT_SIZE = 6;
 var PLAYER_AMOUNT     = Math.round(WIDTH * HEIGHT * 4e-5);
 var ITERATIONS        = 1000;
-var GENERATIONS_HIDDEN = 0;
+var GENERATIONS_HIDDEN = 200;
 var START_HIDDEN_SIZE = 0;
 var MUTATION_RATE     = 0.3;
 var ELITISM_PERCENT   = 0.1;
@@ -110,13 +110,13 @@ function endEvaluation(){
   console.log('Generation:', neat.generation, '- average score:', neat.getAverage());
   avg = neat.getAverage();
 
-  if(neat.generation > 0 && neat.generation % 100 === 0) {
-    var pop = JSON.stringify(neat.export());
+  if(neat.generation % 100 === 0) {
+    var pop = JSON.stringify(neat.population);
     var blob = new Blob([pop], {type: "application/json"});
     var url  = URL.createObjectURL(blob);
 
     var a = document.createElement('a');
-    a.download    = neat.generation+".json";
+    a.download    = neat.generation+'-'+Math.round(neat.getAverage())+".json";
     a.href        = url;
     a.textContent = "Download";
     a.click();

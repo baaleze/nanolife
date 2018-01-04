@@ -4,6 +4,7 @@ var foods = [];
 var iteration = 0;
 var avg = 0;
 var gen = 0;
+var fps = 0;
 
 /** Setup the canvas */
 function setup(){
@@ -20,6 +21,8 @@ function setup(){
   if(!USE_TRAINED_POP){
     for(var i = 0; i < 100; i++) neat.mutate();
   }
+
+  frameRate(100);
 
   startEvaluation();
 }
@@ -57,6 +60,10 @@ function draw(){
     fill([Math.round(gen/GENERATIONS_HIDDEN*255),0,0]);
     textAlign(CENTER,CENTER);
     text(t,WIDTH/2,HEIGHT/2);
+    text(fps,WIDTH/2,HEIGHT/2+20);
+    if(iteration % 20 === 0){
+      fps = Math.round(frameRate());
+    }
   
 
   iteration++;

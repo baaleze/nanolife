@@ -68,7 +68,7 @@ function Player(genome){
       
   
       // Replace highest score to visualise
-      this.brain.score = this.food + this.size*100 + this.lifetime - this.malus;
+      this.brain.score = this.food + this.size*200 + this.lifetime - this.malus;
       highestFood = this.food > highestFood ? this.food : highestFood;
       highestSize = this.size > highestSize ? this.size : highestSize;
     },
