@@ -72,7 +72,7 @@ function distance(x1, y1, x2, y2){
 }
 
 /** Get a relative color between red and green */
-var activationColor = function(value, max){
+/*var activationColor = function(value, max){
   var power = 1 - Math.min(value/max, 1);
   var color = [255, 255, 0]
 
@@ -83,14 +83,14 @@ var activationColor = function(value, max){
   }
 
   return color;
-}
+}*/
 
 var activationColor = function(value, max, value2, max2){
-  var power = 1 - Math.min(value/max, 1);
-  var power2 = 1 - Math.min(value2/max2, 1);
-  var color = [0, 255, 0]
-  color[0] = power * 255;
-  color[2] = power2 * 255;
+  var power = 1 - Math.max(0,Math.min(value/max, 1));
+  var power2 = 1 - Math.max(0,Math.min(value2/max2, 1));
+  var color = [0, 0, 0]
+  color[0] = Math.round(power * 255);
+  color[2] = Math.round(power2 * 255);
   return color;
 }
 

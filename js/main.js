@@ -12,27 +12,33 @@ var WIDTH            = $('#field').width();
 var HEIGHT           = 800;
 var PIX              = 10;
 
-var MAX_AREA         = 10000;
+var MAX_SIZE         = 40;
 var MIN_AREA         = 1;
 
 var RELATIVE_SIZE    = 1.1;
 var DECREASE_FOOD    = 1;
-var DECREASE_FOOD_GROW = 4;
+var DECREASE_FOOD_GROW = 20;
 var DECREASE_FOOD_GROW_DIST_FACTOR = 2;
 
-var DETECTION_RADIUS = 150;
-var FOOD_DETECTION   = 3;
-var PLAYER_DETECTION = 3;
-var START_FOOD       = 10;
+var DETECTION_RADIUS = 40;
+var FOOD_DETECTION   = 2;
+var MAX_FOOD_DETECTION = FOOD_DETECTION * 10;
+var FOOD_ABSORPTION_RADIUS = 20;
+var PLAYER_DETECTION = 2;
+var MAX_PLAYER_DETECTION = PLAYER_DETECTION * 10;
+var START_FOOD       = 100;
+var MAX_FOOD = 500;
 
 var MIN_SPEED        = 0.5;
 var SPEED            = 3;
 
-var FOOD_AREA        = 80;
+var FOOD        = 50;
 var FOOD_AMOUNT      = Math.round(WIDTH * HEIGHT * 4e-4);
 
 // GA settings
-var PLAYER_AMOUNT     = Math.round(WIDTH * HEIGHT * 8e-5);
+var INPUT_SIZE = 19;
+var OUTPUT_SIZE = 6;
+var PLAYER_AMOUNT     = Math.round(WIDTH * HEIGHT * 4e-5);
 var ITERATIONS        = 1000;
 var START_HIDDEN_SIZE = 0;
 var MUTATION_RATE     = 0.3;
@@ -47,8 +53,8 @@ var neat;
 /** Construct the genetic algorithm */
 function initNeat(){
   neat = new Neat(
-    1 + PLAYER_DETECTION * 3 + FOOD_DETECTION * 2,
-    2,
+    INPUT_SIZE,
+    OUTPUT_SIZE,
     null,
     {
       mutation: [
@@ -70,9 +76,9 @@ function initNeat(){
       mutationRate: MUTATION_RATE,
       elitism: Math.round(ELITISM_PERCENT * PLAYER_AMOUNT),
       network: new Architect.Random(
-        1 + PLAYER_DETECTION * 3 + FOOD_DETECTION * 2,
+        INPUT_SIZE,
         START_HIDDEN_SIZE,
-        2
+        OUTPUT_SIZE
       )
     }
   );
@@ -85,7 +91,8 @@ function initNeat(){
 /** Start the evaluation of the current generation */
 function startEvaluation(){
   players = [];
-  highestScore = 0;
+  highestFood = 0;
+  highestSize = 0;
 
   for(var genome in neat.population){
     genome = neat.population[genome];
