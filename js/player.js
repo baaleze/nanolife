@@ -15,6 +15,7 @@ function Player(genome){
 
     this.nbCell = [1,0,0,0];
     this.lifetime = 0; 
+    this.malus = 0;
     players.push(this);
   }
   
@@ -23,6 +24,7 @@ function Player(genome){
     update: function(){
       this.food -= DECREASE_FOOD*this.size;
       if(this.food < 0){
+        this.malus += DYING_MALUS;
         this.restart();
         return;
       }
@@ -66,7 +68,7 @@ function Player(genome){
       
   
       // Replace highest score to visualise
-      this.brain.score = this.food + this.size*100 + this.lifetime;
+      this.brain.score = this.food + this.size*100 + this.lifetime - this.malus;
       highestFood = this.food > highestFood ? this.food : highestFood;
       highestSize = this.size > highestSize ? this.size : highestSize;
     },

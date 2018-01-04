@@ -30,6 +30,7 @@ var PLAYER_DETECTION = 2;
 var MAX_PLAYER_DETECTION = PLAYER_DETECTION * 10;
 var START_FOOD       = 100;
 var MAX_FOOD = 500;
+var DYING_MALUS = 50;
 
 var MIN_SPEED        = 0.5;
 var SPEED_INCR = 0.1;
@@ -108,6 +109,18 @@ function startEvaluation(){
 function endEvaluation(){
   console.log('Generation:', neat.generation, '- average score:', neat.getAverage());
   avg = neat.getAverage();
+
+  if(neat.generation > 0 && neat.generation % 100 === 0) {
+    var pop = JSON.stringify(neat.export());
+    var blob = new Blob([pop], {type: "application/json"});
+    var url  = URL.createObjectURL(blob);
+
+    var a = document.createElement('a');
+    a.download    = neat.generation+".json";
+    a.href        = url;
+    a.textContent = "Download";
+    a.click();
+  }
 
   neat.sort();
   var newPopulation = [];
