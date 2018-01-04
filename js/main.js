@@ -43,6 +43,7 @@ var INPUT_SIZE = 19;
 var OUTPUT_SIZE = 6;
 var PLAYER_AMOUNT     = Math.round(WIDTH * HEIGHT * 4e-5);
 var ITERATIONS        = 1000;
+var GENERATIONS_HIDDEN = 0;
 var START_HIDDEN_SIZE = 0;
 var MUTATION_RATE     = 0.3;
 var ELITISM_PERCENT   = 0.1;
@@ -106,6 +107,7 @@ function startEvaluation(){
 /** End the evaluation of the current generation */
 function endEvaluation(){
   console.log('Generation:', neat.generation, '- average score:', neat.getAverage());
+  avg = neat.getAverage();
 
   neat.sort();
   var newPopulation = [];
@@ -125,5 +127,6 @@ function endEvaluation(){
   neat.mutate();
 
   neat.generation++;
+  gen = neat.generation;
   startEvaluation();
 }

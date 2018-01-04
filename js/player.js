@@ -9,14 +9,12 @@ function Player(genome){
 
     this.food = START_FOOD;
 
-    this.malus = 0;
-
     this.maxMoveSpeed = MIN_SPEED;
 
     this.cells = [new Cell(0,0,0)];
 
     this.nbCell = [1,0,0,0];
-  
+    this.lifetime = 0; 
     players.push(this);
   }
   
@@ -25,8 +23,6 @@ function Player(genome){
     update: function(){
       this.food -= DECREASE_FOOD*this.size;
       if(this.food < 0){
-        // starving is baaaaad
-        this.malus += 100;
         this.restart();
         return;
       }
@@ -70,7 +66,7 @@ function Player(genome){
       
   
       // Replace highest score to visualise
-      this.brain.score = this.food + this.size - this.malus;
+      this.brain.score = this.food + this.size*100 + this.lifetime;
       highestFood = this.food > highestFood ? this.food : highestFood;
       highestSize = this.size > highestSize ? this.size : highestSize;
     },
@@ -128,6 +124,7 @@ function Player(genome){
       this.food = START_FOOD;
       this.cells = [new Cell(0,0,0)];
       this.nbCell = [1,0,0,0];
+      this.lifetime = 0;
     },
   
     /** Display the player on the field */
@@ -143,8 +140,10 @@ function Player(genome){
           stroke([30,30,230]);
           ellipse(this.x+c.x, this.y+c.y, DETECTION_RADIUS*2);
           if(c.type === 0){
+            /*
             var s = this.vx+' | '+this.vy;
             text(s,this.x+2, this.y, 50,50);
+            */
           }
         }
         if(c.type === 0 || c.type === 1){ // C F
@@ -261,6 +260,10 @@ function Player(genome){
       // FOOD > ANG1 SIZE1 ANG2 SIZE2 ANG3 SIZE3 ANG_BARYCENTER]
       var output = [this.size / MAX_SIZE];
       output.push(this.food / MAX_FOOD);
+      output.push(this.nbCell[1] / MAX_CELL_TYPE);
+      output.push(this.nbCell[2] / MAX_CELL_TYPE);
+      output.push(this.nbCell[3] / MAX_CELL_TYPE);
+
   
       var nbP = 0;
       var sumX = 0;
@@ -313,7 +316,7 @@ function Player(genome){
         output.push(0);
       }
   
-      if(distance(mouseX, mouseY, this.x, this.y) < 100){
+      if(distance(mouseX, mouseY, this.x, this.y) < DETECTION_RADIUS){
         var detected = nearestPlayers.concat(nearestFoods);
         this.showDetection(detected);
       }

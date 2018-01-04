@@ -2,7 +2,8 @@
 var players = [];
 var foods = [];
 var iteration = 0;
-var highestScore = 0;
+var avg = 0;
+var gen = 0;
 
 /** Setup the canvas */
 function setup(){
@@ -39,13 +40,24 @@ function draw(){
 
     // Some players are eaten during the iteration
     player.update();
-    player.show();
+    if(gen > GENERATIONS_HIDDEN){
+      player.show();
+    }
+    
   }
 
-  // Update and visualise food
-  for(var i = foods.length - 1; i >= 0; i--){
-    foods[i].show();
+  if(gen > GENERATIONS_HIDDEN){
+    // Update and visualise food
+    for(var i = foods.length - 1; i >= 0; i--){
+      foods[i].show();
+    }
   }
+  
+    var t = 'GENERATION '+gen+' ('+avg+') ITERATION '+iteration;
+    fill([Math.round(gen/GENERATIONS_HIDDEN*255),0,0]);
+    textAlign(CENTER,CENTER);
+    text(t,WIDTH/2,HEIGHT/2);
+  
 
   iteration++;
 }
